@@ -48,7 +48,7 @@ docker pull inatus/alpine-server:latest
 
 2. **Rodar o container**
 ```bash
-docker run -it SEU_USUARIO/alpine-server:latest
+docker run -it inatus/alpine-server:latest
 ```
 
 ---
