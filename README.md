@@ -43,12 +43,12 @@ A imagem vem com:
 
 1. **Baixar a imagem do Docker Hub**
 ```bash
-docker pull inatus/alpine-server:latest
+docker pull inatus/alpine-server:v2
 ```
 
 2. **Rodar o container**
 ```bash
-docker run -it inatus/alpine-server:latest
+docker run -it inatus/alpine-server:v2
 ```
 
 ---
