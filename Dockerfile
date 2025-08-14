@@ -1,6 +1,8 @@
 FROM alpine:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 RUN apk update && apk upgrade && \
     apk add --no-cache \
@@ -43,6 +45,12 @@ RUN apk update && apk upgrade && \
     subversion \
     mercurial \
     docker-cli \
+    openrc \
+    libc6-compat \
+    gcompat \
+    musl-locales \
+    mandoc \
+    man-pages \
     && rm -rf /var/cache/apk/*
 
 RUN echo 'export LS_OPTIONS="--color=auto"' >> /root/.bashrc && \
@@ -53,6 +61,31 @@ RUN echo 'export LS_OPTIONS="--color=auto"' >> /root/.bashrc && \
     echo 'if [ -f /etc/profile.d/bash_completion.sh ]; then . /etc/profile.d/bash_completion.sh; fi' >> /root/.bashrc
 
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi" >> /root/.bash_profile
+
+RUN echo '#!/bin/bash' > /usr/local/bin/systemctl && \
+    echo 'case "$1" in' >> /usr/local/bin/systemctl && \
+    echo '  start)    shift; rc-service "$@" start ;;' >> /usr/local/bin/systemctl && \
+    echo '  stop)     shift; rc-service "$@" stop ;;' >> /usr/local/bin/systemctl && \
+    echo '  restart)  shift; rc-service "$@" restart ;;' >> /usr/local/bin/systemctl && \
+    echo '  status)   shift; rc-service "$@" status ;;' >> /usr/local/bin/systemctl && \
+    echo '  enable)   shift; rc-update add "$@" boot ;;' >> /usr/local/bin/systemctl && \
+    echo '  disable)  shift; rc-update del "$@" boot ;;' >> /usr/local/bin/systemctl && \
+    echo '  is-enabled) shift; rc-update show | grep "$@" ;;' >> /usr/local/bin/systemctl && \
+    echo '  list-units) rc-status ;;' >> /usr/local/bin/systemctl && \
+    echo '  *) rc-service ;;' >> /usr/local/bin/systemctl && \
+    echo 'esac' >> /usr/local/bin/systemctl && \
+    chmod +x /usr/local/bin/systemctl
+
+RUN echo '#!/bin/bash' > /usr/local/bin/apt && \
+    echo 'case "$1" in' >> /usr/local/bin/apt && \
+    echo '  update) apk update ;;' >> /usr/local/bin/apt && \
+    echo '  upgrade) apk upgrade ;;' >> /usr/local/bin/apt && \
+    echo '  install) shift; apk add --no-cache "$@" ;;' >> /usr/local/bin/apt && \
+    echo '  remove) shift; apk del "$@" ;;' >> /usr/local/bin/apt && \
+    echo '  search) shift; apk search "$@" ;;' >> /usr/local/bin/apt && \
+    echo '  *) apk ;;' >> /usr/local/bin/apt && \
+    echo 'esac' >> /usr/local/bin/apt && \
+    chmod +x /usr/local/bin/apt
 
 SHELL ["/bin/bash", "-c"]
 
